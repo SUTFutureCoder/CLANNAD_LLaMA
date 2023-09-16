@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Finetune {
-    String introduction;
+    String instruction;
     String input;
     String output;
 }
