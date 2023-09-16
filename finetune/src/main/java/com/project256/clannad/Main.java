@@ -13,7 +13,7 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
         Parser parser = new Parser("CLANNAD.txt");
-        BufferedWriter out = new BufferedWriter(new FileWriter("CLANNAD_LLaMA_finetune.json"));
+        BufferedWriter out = new BufferedWriter(new FileWriter("finetune_json/CLANNAD_LLaMA_finetune.json"));
         out.write(new Gson().toJson(new BuildFinetuneFile(parser.parseLines()).build()));
         out.close();
     }
