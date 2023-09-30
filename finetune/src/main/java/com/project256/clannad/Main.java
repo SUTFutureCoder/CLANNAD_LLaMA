@@ -1,10 +1,14 @@
 package com.project256.clannad;
 
 import com.google.gson.Gson;
+import com.project256.clannad.dto.Finetune;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Xingchen.Lin
@@ -13,8 +17,17 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) throws IOException {
         Parser parser = new Parser("CLANNAD.txt");
-        BufferedWriter out = new BufferedWriter(new FileWriter("finetune_json/CLANNAD_LLaMA_finetune.json"));
-        out.write(new Gson().toJson(new BuildFinetuneFile(parser.parseLines()).build()));
-        out.close();
+        List<Finetune> dataset = new ArrayList<>();
+        List<Finetune> validator = new ArrayList<>();
+        new BuildFinetuneFile(parser.parseLines()).prepare().map().split(dataset, validator);
+
+        BufferedWriter finetuneOut = new BufferedWriter(new FileWriter("finetune_json/CLANNAD_LLaMA_finetune.json"));
+        BufferedWriter validatorOut = new BufferedWriter(new FileWriter("validator_json/CLANNAD_LLaMA_validator.json"));
+
+        finetuneOut.write(new Gson().toJson(dataset));
+        validatorOut.write(new Gson().toJson(validator));
+
+        finetuneOut.close();
+        validatorOut.close();
     }
 }

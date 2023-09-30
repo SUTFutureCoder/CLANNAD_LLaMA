@@ -2,10 +2,13 @@ package com.project256.clannad;
 
 import com.project256.clannad.dto.CharacterQuote;
 import com.project256.clannad.dto.Finetune;
+import com.project256.clannad.dto.FinetuneWithCharacter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -16,16 +19,18 @@ public class BuildFinetuneFile {
 
     List<CharacterQuote> characterQuotes;
 
+    List<FinetuneWithCharacter> finetuneWithCharacters = new ArrayList<>();
+
+    HashMap<String, List<Finetune>> finetuneMap = new HashMap<>(42);
+
     BuildFinetuneFile(List<CharacterQuote> quotes) {
         characterQuotes = quotes;
     }
 
-    public List<Finetune> build() {
+    public BuildFinetuneFile prepare() {
         if (CollectionUtils.isEmpty(characterQuotes)) {
-            return null;
+            return this;
         }
-
-        List<Finetune> finetunes = new ArrayList<>();
 
         String lastContinuedQuote = "";
         String continuedQuote = "";
@@ -36,15 +41,38 @@ public class BuildFinetuneFile {
             }
             // name changed submit last quotes
             if (!StringUtils.isEmpty(continuedQuote)) {
-                finetunes.add(new Finetune(lastContinuedQuote, "", continuedQuote));
+                Finetune finetune = new Finetune(lastContinuedQuote, "", continuedQuote);
+                finetuneWithCharacters.add(new FinetuneWithCharacter(characterQuotes.get(i - 1).getName(), characterQuotes.get(i).getName(), finetune));
                 lastContinuedQuote = continuedQuote;
             }
             continuedQuote = characterQuotes.get(i).getQuote();
         }
         // submit last quotes
         if (!StringUtils.isEmpty(continuedQuote)) {
-            finetunes.add(new Finetune(lastContinuedQuote, "", continuedQuote));
+            Finetune finetune = new Finetune(lastContinuedQuote, "", continuedQuote);
+            finetuneWithCharacters.add(new FinetuneWithCharacter(characterQuotes.get(characterQuotes.size() - 2).getName(), characterQuotes.get(characterQuotes.size() - 1).getName(), finetune));
+
         }
-        return finetunes;
+        return this;
+    }
+
+    public BuildFinetuneFile map() {
+        for (FinetuneWithCharacter finetuneWithCharacter : finetuneWithCharacters) {
+            String characterKey = finetuneWithCharacter.getInputCharactor() + "_" + finetuneWithCharacter.getOutputCharactor();
+            List<Finetune> finetunes = finetuneMap.getOrDefault(characterKey, new ArrayList<>());
+            finetunes.add(finetuneWithCharacter.getFinetune());
+            finetuneMap.put(characterKey, finetunes);
+        }
+        return this;
+    }
+
+    public void split(List<Finetune> dataset, List<Finetune> validator) {
+        for (String character : finetuneMap.keySet()) {
+            List<Finetune> list = finetuneMap.get(character);
+            Collections.shuffle(list);
+            int splitPoint = (int) (list.size() * 0.7);
+            dataset.addAll(list.subList(0, splitPoint));
+            validator.addAll(list.subList(splitPoint, list.size()));
+        }
     }
 }
