@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-        Parser parser = new Parser("CLANNAD_filted.txt");
+        Parser parser = new Parser("pt_txt/CLANNAD_filted.txt");
         List<Finetune> dataset = new ArrayList<>();
         List<Finetune> validator = new ArrayList<>();
         new BuildFinetuneFile(parser.parseLines()).prepare().map().split(dataset, validator);

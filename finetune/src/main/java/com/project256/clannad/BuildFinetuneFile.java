@@ -69,7 +69,7 @@ public class BuildFinetuneFile {
     public void split(List<Finetune> dataset, List<Finetune> validator) {
         for (String character : finetuneMap.keySet()) {
             List<Finetune> list = finetuneMap.get(character);
-            Collections.shuffle(list);
+//            Collections.shuffle(list);
             int splitPoint = (int) (list.size() * 0.7);
             dataset.addAll(list.subList(0, splitPoint));
             validator.addAll(list.subList(splitPoint, list.size()));
