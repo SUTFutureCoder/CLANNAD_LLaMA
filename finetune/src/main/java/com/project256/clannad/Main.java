@@ -16,9 +16,10 @@ import java.util.List;
  */
 public class Main {
     public static void main(String[] args) throws IOException {
-        Parser parser = new Parser("pt_txt/CLANNAD_filted.txt");
         List<Finetune> dataset = new ArrayList<>();
         List<Finetune> validator = new ArrayList<>();
+
+        Parser parser = new Parser("pt_txt/CLANNAD_filted.txt");
         new BuildFinetuneFile(parser.parseLines()).prepare().map().split(dataset, validator);
 
         BufferedWriter finetuneOut = new BufferedWriter(new FileWriter("finetune_json/CLANNAD_LLaMA_finetune.json"));
